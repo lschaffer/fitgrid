@@ -190,6 +190,25 @@ class FitGridColumnFilter {
       ('=', FitGridFilterOperator.equals),
     ];
 
+    final lower = trimmed.toLowerCase();
+    if (lower.startsWith('in:') || (lower.startsWith('in(') && lower.endsWith(')'))) {
+      final content = lower.startsWith('in:')
+          ? trimmed.substring(3).trim()
+          : trimmed.substring(3, trimmed.length - 1).trim();
+      final items = content
+          .split(RegExp(r'\s*,\s*|\s+or\s+|\|', caseSensitive: false))
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toSet();
+      if (items.isNotEmpty) {
+        return FitGridColumnFilter(
+          operator: FitGridFilterOperator.inList,
+          value: items.join(', '),
+          values: items,
+        );
+      }
+    }
+
     if (kind == FitGridFilterKind.text) {
       const textPrefixes = <(String, FitGridFilterOperator)>[
         ('!=', FitGridFilterOperator.notEquals),
@@ -250,6 +269,9 @@ class FitGridColumnFilter {
   /// the filter dialog can express.
   String? toText(FitGridFilterKind kind) {
     if (kind == FitGridFilterKind.checklist) return null;
+    if (operator == FitGridFilterOperator.inList && values.isNotEmpty) {
+      return 'in: ${values.join(', ')}';
+    }
     final v = value;
     if (v == null) return null;
     final shown = v is DateTime ? _formatDate(v) : '$v';
