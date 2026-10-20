@@ -190,6 +190,8 @@ void main() {
     expect(harness.commits, isEmpty);
     expect(find.byType(TextField), findsOneWidget);
     expect(harness.controller.editing.error, 'Name is required');
+    expect(find.byType(Tooltip), findsOneWidget);
+    expect(tester.widget<Tooltip>(find.byType(Tooltip)).message, 'Name is required');
   });
 
   testWidgets('Tab commits and moves to the next editable column', (
@@ -308,6 +310,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(TextField), findsNothing);
+    expect(find.byType(Tooltip), findsNothing);
     await tester.tap(find.text('pick'));
     await tester.pumpAndSettle();
 
